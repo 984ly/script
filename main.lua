@@ -25,7 +25,7 @@ getgenv().Config = {
     AutoRaid = true,
     AutoCombo = true,
     AutoBuy = false,
-    FPSBoost = false,
+    FPSBoost = true,
 
     BuyConfig = {
         ["Lucky Arrow"] = false,
@@ -219,7 +219,7 @@ local function setupFarm(hrp)
     lv.RelativeTo = Enum.ActuatorRelativeTo.World
     lv.Parent = hrp
 
-    local offsetY = -5
+    local offsetY = -6
     local speed = 5
 
     lockedTarget = nil
@@ -255,9 +255,6 @@ task.spawn(function()
 
             m1()
             task.wait(0.1)
-
-            skill("Z")
-            task.wait(0.2)
 
             skill("X")
             task.wait(0.2)
@@ -302,15 +299,26 @@ end)
 -- FPS BOOST (SAFE VERSION)
 --==================================================
 
-local function destroyNamedDescendants(parent, name)
-    for _, obj in ipairs(parent:GetDescendants()) do
-        if obj.Name == name then
-            obj:Destroy()
-        end
+-- Função pra apagar com segurança
+local function destroyIfExists(parent, name)
+    local obj = parent:FindFirstChild(name)
+    if obj then
+        obj:Destroy()
     end
 end
 
-destroyNamedDescendants(workspace:FindFirstChild("Map") or workspace, "Map")
+-- Referência principal
+local workspaceRef = workspace
+
+-- Apagar Effects e Projectiles (no Workspace)
+destroyIfExists(workspaceRef, "Effects")
+destroyIfExists(workspaceRef, "Projectiles")
+
+-- Apagar Map dentro de Map
+local mapFolder = workspaceRef:FindFirstChild("Map")
+if mapFolder then
+    destroyIfExists(mapFolder, "Map")
+end
 -- RESPAWN
 --==================================================
 player.CharacterAdded:Connect(function(char)
